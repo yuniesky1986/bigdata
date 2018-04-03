@@ -32,6 +32,7 @@ $ ./configure-members.sh
 
 $ ./start-hadoop.sh 
 $ ./start-hbase.sh 
+$ hbase thrift start
 #For stop Hadoop ./stop-hadoop.sh
 
 ######Print status of Hadoop cluster

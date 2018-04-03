@@ -23,12 +23,15 @@ def process(f, c):
                 entries.append(entry)
             rownum += 1
         families = {'SensorData': {}}
+        string_families = "SensorData"
         cont = 1
         while cont <= c:
+            string_families += "|Measure%d" % cont
             families.update({"Measure%d" % cont: {}})
             cont += 1
         conn = happybase.Connection(host="master.krejcmat.com", port=9090)
         conn.open()
+        print "Se estan creando las familias %s" % string_families
         tables = conn.tables()
         if "Sensores" in tables:
             table = conn.table('Sensores')
@@ -38,8 +41,10 @@ def process(f, c):
         batch = table.batch(batch_size=1000)
         for entry in entries:
             for family in families.iterkeys():
+                print "Registrando Datos de la familia %s" % family
                 if family == "SensorData":
                     for head in header[:2]:
+                        print "Introduciendo %s" % str({'%s:%s' % (family, head): entry[head]})
                         cont = 1
                         while cont <= f:
                             row_key = str(cont) + entry.get('Sensor')
@@ -47,6 +52,7 @@ def process(f, c):
                             batch.put(row_key, {'%s:%s' % (family, head): entry[head]})
                 else:
                     for head in header[2:]:
+                        print "Introduciendo %s" % str({'%s:%s' % (family, head): entry[head]})
                         cont = 1
                         while cont <= f:
                             row_key = str(cont) + entry.get('Sensor')
@@ -60,4 +66,5 @@ if __name__ == "__main__":
     arg = sys.argv
     f = arg[1]
     c = arg[2]
+    print "Se crearan %s filas y %c columnas" % (f,c)
     process(int(f), int(c))
